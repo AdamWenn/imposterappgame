@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#d84f2a">
+  <title>Imposter</title>
+  <style>
+    :root {
+      --bg: #f7eddc;
+      --bg-strong: #f2d8a7;
+      --card: rgba(255, 248, 235, 0.92);
+      --ink: #1f1f1b;
+      --muted: #5f584f;
+      --accent: #d84f2a;
+      --accent-2: #1f7a72;
+      --danger: #9f2f2f;
+      --line: rgba(31, 31, 27, 0.12);
+      --shadow: 0 20px 60px rgba(111, 67, 26, 0.18);
+      --radius: 24px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(216, 79, 42, 0.26), transparent 28%),
+        radial-gradient(circle at top right, rgba(31, 122, 114, 0.16), transparent 24%),
+        linear-gradient(180deg, #fbf2e3 0%, #efd5a1 100%);
+      color: var(--ink);
+      font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      padding: calc(18px + var(--safe-top)) 18px calc(24px + var(--safe-bottom));
+      position: relative;
+    }
+
+    .grain,
+    .grain::before,
+    .grain::after {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .grain::before,
+    .grain::after {
+      content: "";
+      opacity: 0.16;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,0.6) 0 2px, transparent 3px),
+        radial-gradient(circle at 60% 80%, rgba(0,0,0,0.05) 0 1px, transparent 2px),
+        radial-gradient(circle at 30% 50%, rgba(255,255,255,0.4) 0 1px, transparent 2px);
+      background-size: 180px 180px;
+      mix-blend-mode: soft-light;
+    }
+
+    .screen {
+      display: none;
+      animation: rise 220ms ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero,
+    .panel {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.7);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 26px 22px;
+      border-radius: 32px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.85), rgba(255,241,219,0.88));
+      margin-bottom: 16px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -28px;
+      top: -18px;
+      width: 118px;
+      height: 118px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(216,79,42,0.18), rgba(31,122,114,0.08));
+      transform: rotate(18deg);
+    }
+
+    .panel {
+      padding: 18px;
+      border-radius: var(--radius);
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      margin-bottom: 14px;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 2rem;
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      max-width: 220px;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+
+    .subtle {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.95rem;
+      margin-top: 12px;
+    }
+
+    .stack,
+    .menu-buttons,
+    .deck-list,
+    .card-list,
+    .play-shell {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid-2,
+    .footer-actions {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(31,31,27,0.08);
+      margin-bottom: 12px;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      border-radius: 18px;
+      padding: 15px 16px;
+      background: var(--ink);
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 12px 24px rgba(31,31,27,0.16);
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    button.secondary {
+      background: rgba(255,255,255,0.76);
+      color: var(--ink);
+      border: 1px solid rgba(31,31,27,0.08);
+      box-shadow: none;
+    }
+
+    button.accent {
+      background: linear-gradient(135deg, var(--accent), #ea7c36);
+    }
+
+    button.teal {
+      background: linear-gradient(135deg, var(--accent-2), #35a79d);
+    }
+
+    button.danger {
+      background: var(--danger);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.84);
+      padding: 14px 15px;
+      color: var(--ink);
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .deck-item,
+    .card-item {
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(31,31,27,0.08);
+    }
+
+    .deck-row,
+    .card-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .deck-meta,
+    .card-meta,
+    .mini {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .deck-actions,
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .small-btn {
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      box-shadow: none;
+    }
+
+    .pin-dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(31,31,27,0.14);
+      border: 1px solid rgba(31,31,27,0.08);
+    }
+
+    .dot.filled {
+      background: var(--accent);
+    }
+
+    .pin-pad {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .pin-pad button {
+      padding: 18px 0;
+      font-size: 1.1rem;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.76);
+      color: var(--ink);
+      box-shadow: none;
+      border: 1px solid rgba(31,31,27,0.08);
+    }
+
+    .message {
+      min-height: 20px;
+      color: var(--danger);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .turn-header {
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .hold-zone {
+      position: relative;
+      min-height: 360px;
+      border-radius: 36px;
+      background:
+        radial-gradient(circle at top, rgba(216,79,42,0.15), transparent 38%),
+        linear-gradient(180deg, rgba(255,255,255,0.84), rgba(255,244,225,0.9));
+      border: 1px solid rgba(255,255,255,0.82);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      user-select: none;
+      touch-action: manipulation;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .hold-zone.ready::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border-radius: 28px;
+      border: 2px dashed rgba(31,31,27,0.14);
+    }
+
+    .hold-center {
+      width: 190px;
+      height: 190px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 18px;
+      color: white;
+      background: linear-gradient(135deg, var(--ink), #43382f);
+      box-shadow: 0 16px 36px rgba(31,31,27,0.24);
+    }
+
+    .hold-zone.revealed .hold-center {
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+      min-height: 280px;
+      border-radius: 28px;
+      background: white;
+      color: var(--ink);
+      padding: 18px;
+      align-content: start;
+      gap: 12px;
+      box-shadow: 0 18px 40px rgba(31,31,27,0.18);
+    }
+
+    .hold-hint {
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.94rem;
+      line-height: 1.4;
+      max-width: 240px;
+    }
+
+    .card-image {
+      width: 100%;
+      border-radius: 20px;
+      object-fit: cover;
+      max-height: 180px;
+      background: #f3efe7;
+      display: none;
+    }
+
+    .card-image.visible {
+      display: block;
+    }
+
+    .role-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 auto;
+    }
+
+    .role-chip.normal {
+      background: rgba(31,122,114,0.12);
+      color: var(--accent-2);
+    }
+
+    .role-chip.imposter {
+      background: rgba(159,47,47,0.12);
+      color: var(--danger);
+    }
+
+    .big-card-text {
+      font-size: 1.35rem;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 399px) {
+      .footer-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="grain"></div>
+
+    <section id="homeScreen" class="screen active">
+      <div class="hero">
+        <div class="pill">Mobile web app - add to Home Screen on iPhone</div>
+        <h1>Imposter</h1>
+        <p class="subtle">Build decks, lock them behind a PIN, and run pass-the-phone rounds where one player is the imposter.</p>
+      </div>
+
+      <div class="menu-buttons">
+        <button class="accent" id="goPlayBtn">Play</button>
+        <button class="teal" id="goManageBtn">Manage Decks</button>
+      </div>
+    </section>
+
+    <section id="pinScreen" class="screen">
+      <div class="panel">
+        <div class="pill">PIN required</div>
+        <h2>Enter deck PIN</h2>
+        <p class="subtle">Use the 4-digit code to view, create, or edit decks.</p>
+        <div class="pin-dots" id="pinDots"></div>
+        <div class="message" id="pinMessage"></div>
+        <div class="pin-pad" id="pinPad"></div>
+        <div class="deck-actions">
+          <button class="secondary small-btn" id="pinBackBtn">Back</button>
+          <button class="secondary small-btn" id="pinClearBtn">Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="manageScreen" class="screen">
+      <div class="panel">
+        <div class="deck-row">
+          <div>
+            <div class="pill">Deck manager</div>
+            <h2>Your decks</h2>
+          </div>
+          <button class="secondary small-btn" id="manageHomeBtn">Home</button>
+        </div>
+        <p class="subtle">Each card is one prompt. Add text and an optional image URL.</p>
+      </div>
+
+      <div class="panel stack">
+        <label>
+          Deck name
+          <input id="deckNameInput" type="text" maxlength="40" placeholder="Example: Food, Movies, Animals">
+        </label>
+        <button class="accent" id="createDeckBtn">Create deck</button>
+      </div>
+
+      <div class="deck-list" id="deckList"></div>
+    </section>
+
+    <section id="editorScreen" class="screen">
+      <div class="panel">
+        <div class="deck-row">
+          <div>
+            <div class="pill">Deck editor</div>
+            <h2 id="editorTitle">Deck</h2>
+            <p class="subtle" id="editorMeta"></p>
+          </div>
+          <button class="secondary small-btn" id="editorBackBtn">Back</button>
+        </div>
+      </div>
+
+      <div class="panel stack">
+        <label>
+          Card text
+          <textarea id="cardTextInput" maxlength="300" placeholder="What should non-imposters see?"></textarea>
+        </label>
+        <label>
+          Image URL (optional)
+          <input id="cardImageInput" type="url" placeholder="https://example.com/image.jpg">
+        </label>
+        <button class="accent" id="addCardBtn">Add card</button>
+      </div>
+
+      <div class="card-list" id="cardList"></div>
+    </section>
+
+    <section id="playSetupScreen" class="screen">
+      <div class="panel">
+        <div class="deck-row">
+          <div>
+            <div class="pill">Game setup</div>
+            <h2>Start a round</h2>
+          </div>
+          <button class="secondary small-btn" id="setupHomeBtn">Home</button>
+        </div>
+      </div>
+
+      <div class="panel stack">
+        <label>
+          Number of players
+          <input id="playerCountInput" type="number" min="3" max="20" value="4">
+        </label>
+        <label>
+          Deck
+          <select id="deckSelect"></select>
+        </label>
+        <button class="accent" id="startGameBtn">Start game</button>
+      </div>
+    </section>
+
+    <section id="playScreen" class="screen">
+      <div class="play-shell">
+        <div class="panel turn-header">
+          <div class="pill" id="roundInfo">Round</div>
+          <h2 id="playerTitle">Player 1</h2>
+          <p class="subtle" id="playerInstruction">Press and hold in the middle to reveal your card.</p>
+        </div>
+
+        <div class="hold-zone ready" id="holdZone">
+          <div class="hold-center" id="holdCenter">
+            <div id="holdPrompt">
+              <strong>Hold to reveal</strong>
+              <p class="hold-hint">Keep your finger down. Lift it to hide the card again.</p>
+            </div>
+            <img id="playCardImage" class="card-image" alt="Card image">
+            <div id="playRoleChip" class="role-chip hidden"></div>
+            <div id="playCardText" class="big-card-text hidden"></div>
+          </div>
+        </div>
+
+        <div class="footer-actions">
+          <button class="accent" id="nextPlayerBtn" disabled>Next person</button>
+          <button class="secondary" id="endGameBtn">End game</button>
+        </div>
+        <p class="mini" id="turnStatus"></p>
+      </div>
+    </section>
+  </div>
+  <script>
+    const STORAGE_KEY = "imposter-single-file-data-v1";
+    const PIN_CODE = "1111";
+
+    const defaultData = {
+      decks: [
+        {
+          id: crypto.randomUUID(),
+          name: "Starter Deck",
+          cards: [
+            { id: crypto.randomUUID(), text: "Pizza", image: "" },
+            { id: crypto.randomUUID(), text: "Beach", image: "" },
+            { id: crypto.randomUUID(), text: "Tiger", image: "" }
+          ]
+        }
+      ]
+    };
+
+    const state = {
+      pinEntry: "",
+      selectedDeckId: null,
+      game: null
+    };
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
+          return structuredClone(defaultData);
+        }
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed.decks)) {
+          throw new Error("Invalid save");
+        }
+        return parsed;
+      } catch {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
+        return structuredClone(defaultData);
+      }
+    }
+
+    let data = loadData();
+
+    const screens = {
+      homeScreen: document.getElementById("homeScreen"),
+      pinScreen: document.getElementById("pinScreen"),
+      manageScreen: document.getElementById("manageScreen"),
+      editorScreen: document.getElementById("editorScreen"),
+      playSetupScreen: document.getElementById("playSetupScreen"),
+      playScreen: document.getElementById("playScreen")
+    };
+
+    const deckList = document.getElementById("deckList");
+    const cardList = document.getElementById("cardList");
+    const deckSelect = document.getElementById("deckSelect");
+    const deckNameInput = document.getElementById("deckNameInput");
+    const editorTitle = document.getElementById("editorTitle");
+    const editorMeta = document.getElementById("editorMeta");
+    const cardTextInput = document.getElementById("cardTextInput");
+    const cardImageInput = document.getElementById("cardImageInput");
+    const pinDots = document.getElementById("pinDots");
+    const pinMessage = document.getElementById("pinMessage");
+    const playerCountInput = document.getElementById("playerCountInput");
+    const roundInfo = document.getElementById("roundInfo");
+    const playerTitle = document.getElementById("playerTitle");
+    const playerInstruction = document.getElementById("playerInstruction");
+    const holdZone = document.getElementById("holdZone");
+    const holdPrompt = document.getElementById("holdPrompt");
+    const playRoleChip = document.getElementById("playRoleChip");
+    const playCardText = document.getElementById("playCardText");
+    const playCardImage = document.getElementById("playCardImage");
+    const nextPlayerBtn = document.getElementById("nextPlayerBtn");
+    const turnStatus = document.getElementById("turnStatus");
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function showScreen(id) {
+      Object.entries(screens).forEach(([key, element]) => {
+        element.classList.toggle("active", key === id);
+      });
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getSelectedDeck() {
+      return data.decks.find((deck) => deck.id === state.selectedDeckId) || null;
+    }
+
+    function renderDeckList() {
+      if (!data.decks.length) {
+        deckList.innerHTML = '<div class="panel"><p class="subtle">No decks yet. Create one above.</p></div>';
+        return;
+      }
+
+      deckList.innerHTML = data.decks.map((deck) => `
+        <div class="deck-item">
+          <div class="deck-row">
+            <div>
+              <strong>${escapeHtml(deck.name)}</strong>
+              <div class="deck-meta">${deck.cards.length} card${deck.cards.length === 1 ? "" : "s"}</div>
+            </div>
+          </div>
+          <div class="deck-actions">
+            <button class="small-btn accent" data-action="edit-deck" data-id="${deck.id}">Open</button>
+            <button class="small-btn secondary" data-action="rename-deck" data-id="${deck.id}">Rename</button>
+            <button class="small-btn danger" data-action="delete-deck" data-id="${deck.id}">Delete</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderDeckOptions() {
+      if (!data.decks.length) {
+        deckSelect.innerHTML = "<option value=''>No decks available</option>";
+        return;
+      }
+
+      deckSelect.innerHTML = data.decks.map((deck) => {
+        const disabled = deck.cards.length === 0 ? "disabled" : "";
+        return `<option value="${deck.id}" ${disabled}>${escapeHtml(deck.name)}${deck.cards.length ? "" : " (empty)"}</option>`;
+      }).join("");
+
+      const firstPlayable = data.decks.find((deck) => deck.cards.length > 0) || data.decks[0];
+      deckSelect.value = firstPlayable.id;
+    }
+
+    function renderEditor() {
+      const deck = getSelectedDeck();
+      if (!deck) {
+        showScreen("manageScreen");
+        return;
+      }
+
+      editorTitle.textContent = deck.name;
+      editorMeta.textContent = `${deck.cards.length} card${deck.cards.length === 1 ? "" : "s"}`;
+
+      if (!deck.cards.length) {
+        cardList.innerHTML = '<div class="panel"><p class="subtle">No cards yet. Add one above.</p></div>';
+        return;
+      }
+
+      cardList.innerHTML = deck.cards.map((card) => `
+        <div class="card-item">
+          <div class="card-row">
+            <div>
+              <strong>${escapeHtml(card.text)}</strong>
+              <div class="card-meta">${card.image ? "Has image" : "Text only"}</div>
+            </div>
+          </div>
+          ${card.image ? `<img class="card-image visible" src="${escapeHtml(card.image)}" alt="Card preview" onerror="this.style.display='none'">` : ""}
+          <div class="card-actions">
+            <button class="small-btn secondary" data-action="edit-card" data-card-id="${card.id}">Edit</button>
+            <button class="small-btn danger" data-action="delete-card" data-card-id="${card.id}">Delete</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderPinDots() {
+      pinDots.innerHTML = Array.from({ length: 4 }, (_, index) => `
+        <div class="dot ${index < state.pinEntry.length ? "filled" : ""}"></div>
+      `).join("");
+    }
+
+    function resetPin() {
+      state.pinEntry = "";
+      pinMessage.textContent = "";
+      renderPinDots();
+    }
+
+    function verifyPinMaybe() {
+      if (state.pinEntry.length < 4) {
+        return;
+      }
+
+      if (state.pinEntry === PIN_CODE) {
+        resetPin();
+        renderDeckList();
+        showScreen("manageScreen");
+        return;
+      }
+
+      pinMessage.textContent = "Wrong PIN";
+      state.pinEntry = "";
+      renderPinDots();
+    }
+
+    function createDeck(name) {
+      data.decks.unshift({
+        id: crypto.randomUUID(),
+        name,
+        cards: []
+      });
+      saveData();
+      renderDeckList();
+      renderDeckOptions();
+    }
+
+    function createGame() {
+      const playerCount = Number(playerCountInput.value);
+      const deckId = deckSelect.value;
+      const deck = data.decks.find((item) => item.id === deckId);
+
+      if (!deck || deck.cards.length === 0) {
+        alert("Choose a deck with at least one card.");
+        return;
+      }
+      if (!Number.isInteger(playerCount) || playerCount < 3 || playerCount > 20) {
+        alert("Player count must be between 3 and 20.");
+        return;
+      }
+
+      const chosenCard = deck.cards[Math.floor(Math.random() * deck.cards.length)];
+      const imposterIndex = Math.floor(Math.random() * playerCount);
+
+      state.game = {
+        deckName: deck.name,
+        playerCount,
+        currentPlayer: 0,
+        imposterIndex,
+        card: chosenCard,
+        revealed: false,
+        wasHeldThisTurn: false
+      };
+
+      updatePlayScreen();
+      showScreen("playScreen");
+    }
+
+    function currentPlayerIsImposter() {
+      return state.game && state.game.currentPlayer === state.game.imposterIndex;
+    }
+
+    function updatePlayScreen() {
+      const game = state.game;
+      if (!game) {
+        showScreen("playSetupScreen");
+        return;
+      }
+
+      const playerNumber = game.currentPlayer + 1;
+      const isImposter = currentPlayerIsImposter();
+
+      roundInfo.textContent = `${game.deckName} - ${game.playerCount} players`;
+      playerTitle.textContent = playerNumber <= game.playerCount ? `Player ${playerNumber}` : "Done";
+      playerInstruction.textContent = playerNumber <= game.playerCount
+        ? "Press and hold in the middle to reveal your card."
+        : "Everyone has seen their card.";
+      turnStatus.textContent = playerNumber <= game.playerCount
+        ? "One random card was picked for this round. Exactly one player is the imposter."
+        : "Round complete. Start again for a new random card and a new imposter.";
+
+      holdZone.classList.remove("revealed", "hidden");
+      holdZone.classList.add("ready");
+      holdPrompt.classList.remove("hidden");
+      playRoleChip.classList.add("hidden");
+      playCardText.classList.add("hidden");
+      playCardImage.classList.remove("visible");
+      playCardImage.removeAttribute("src");
+      nextPlayerBtn.disabled = true;
+      nextPlayerBtn.classList.remove("hidden");
+
+      game.revealed = false;
+      game.wasHeldThisTurn = false;
+
+      if (playerNumber > game.playerCount) {
+        holdZone.classList.add("hidden");
+        nextPlayerBtn.classList.add("hidden");
+        return;
+      }
+
+      playRoleChip.textContent = isImposter ? "Imposter" : "Card";
+      playRoleChip.className = `role-chip ${isImposter ? "imposter" : "normal"} hidden`;
+      playCardText.textContent = isImposter ? "Imposter" : game.card.text;
+      if (!isImposter && game.card.image) {
+        playCardImage.src = game.card.image;
+      }
+    }
+
+    function revealCard() {
+      const game = state.game;
+      if (!game || game.currentPlayer >= game.playerCount || game.revealed) {
+        return;
+      }
+
+      game.revealed = true;
+      game.wasHeldThisTurn = true;
+      holdZone.classList.add("revealed");
+      holdZone.classList.remove("ready");
+      holdPrompt.classList.add("hidden");
+      playRoleChip.classList.remove("hidden");
+      playCardText.classList.remove("hidden");
+      if (!currentPlayerIsImposter() && game.card.image) {
+        playCardImage.classList.add("visible");
+      }
+    }
+
+    function hideCard() {
+      const game = state.game;
+      if (!game || !game.revealed) {
+        return;
+      }
+
+      game.revealed = false;
+      holdZone.classList.remove("revealed");
+      holdZone.classList.add("ready");
+      holdPrompt.classList.remove("hidden");
+      playRoleChip.classList.add("hidden");
+      playCardText.classList.add("hidden");
+      playCardImage.classList.remove("visible");
+      nextPlayerBtn.disabled = !game.wasHeldThisTurn;
+    }
+
+    function nextPlayer() {
+      if (!state.game) {
+        return;
+      }
+      state.game.currentPlayer += 1;
+      updatePlayScreen();
+    }
+
+    document.getElementById("goPlayBtn").addEventListener("click", () => {
+      renderDeckOptions();
+      showScreen("playSetupScreen");
+    });
+
+    document.getElementById("goManageBtn").addEventListener("click", () => {
+      resetPin();
+      showScreen("pinScreen");
+    });
+
+    document.getElementById("pinBackBtn").addEventListener("click", () => showScreen("homeScreen"));
+    document.getElementById("pinClearBtn").addEventListener("click", resetPin);
+    document.getElementById("manageHomeBtn").addEventListener("click", () => showScreen("homeScreen"));
+    document.getElementById("editorBackBtn").addEventListener("click", () => {
+      renderDeckList();
+      showScreen("manageScreen");
+    });
+    document.getElementById("setupHomeBtn").addEventListener("click", () => showScreen("homeScreen"));
+    document.getElementById("endGameBtn").addEventListener("click", () => {
+      state.game = null;
+      showScreen("playSetupScreen");
+    });
+
+    document.getElementById("createDeckBtn").addEventListener("click", () => {
+      const name = deckNameInput.value.trim();
+      if (!name) {
+        alert("Enter a deck name.");
+        return;
+      }
+      createDeck(name);
+      deckNameInput.value = "";
+    });
+
+    document.getElementById("addCardBtn").addEventListener("click", () => {
+      const deck = getSelectedDeck();
+      const text = cardTextInput.value.trim();
+      const image = cardImageInput.value.trim();
+      if (!deck) {
+        return;
+      }
+      if (!text) {
+        alert("Card text is required.");
+        return;
+      }
+      deck.cards.unshift({ id: crypto.randomUUID(), text, image });
+      saveData();
+      cardTextInput.value = "";
+      cardImageInput.value = "";
+      renderEditor();
+      renderDeckList();
+      renderDeckOptions();
+    });
+
+    deckList.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) {
+        return;
+      }
+      const deckId = button.dataset.id;
+      const deck = data.decks.find((item) => item.id === deckId);
+      if (!deck) {
+        return;
+      }
+
+      if (button.dataset.action === "edit-deck") {
+        state.selectedDeckId = deckId;
+        renderEditor();
+        showScreen("editorScreen");
+      }
+
+      if (button.dataset.action === "rename-deck") {
+        const nextName = prompt("Rename deck", deck.name);
+        if (!nextName) {
+          return;
+        }
+        deck.name = nextName.trim() || deck.name;
+        saveData();
+        renderDeckList();
+        renderDeckOptions();
+        if (state.selectedDeckId === deck.id) {
+          renderEditor();
+        }
+      }
+
+      if (button.dataset.action === "delete-deck") {
+        if (!confirm(`Delete "${deck.name}"?`)) {
+          return;
+        }
+        data.decks = data.decks.filter((item) => item.id !== deckId);
+        if (state.selectedDeckId === deckId) {
+          state.selectedDeckId = null;
+        }
+        saveData();
+        renderDeckList();
+        renderDeckOptions();
+      }
+    });
+
+    cardList.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) {
+        return;
+      }
+      const deck = getSelectedDeck();
+      if (!deck) {
+        return;
+      }
+      const cardId = button.dataset.cardId;
+      const card = deck.cards.find((item) => item.id === cardId);
+      if (!card) {
+        return;
+      }
+
+      if (button.dataset.action === "edit-card") {
+        const nextText = prompt("Edit card text", card.text);
+        if (nextText === null) {
+          return;
+        }
+        const nextImage = prompt("Edit image URL (optional)", card.image || "");
+        if (nextImage === null) {
+          return;
+        }
+        card.text = nextText.trim() || card.text;
+        card.image = nextImage.trim();
+        saveData();
+        renderEditor();
+        renderDeckList();
+        renderDeckOptions();
+      }
+
+      if (button.dataset.action === "delete-card") {
+        if (!confirm("Delete this card?")) {
+          return;
+        }
+        deck.cards = deck.cards.filter((item) => item.id !== cardId);
+        saveData();
+        renderEditor();
+        renderDeckList();
+        renderDeckOptions();
+      }
+    });
+
+    document.getElementById("startGameBtn").addEventListener("click", createGame);
+    nextPlayerBtn.addEventListener("click", nextPlayer);
+
+    const holdStart = (event) => {
+      event.preventDefault();
+      revealCard();
+    };
+
+    const holdEnd = (event) => {
+      event.preventDefault();
+      hideCard();
+    };
+
+    ["pointerdown", "mousedown", "touchstart"].forEach((name) => {
+      holdZone.addEventListener(name, holdStart);
+    });
+    ["pointerup", "pointercancel", "pointerleave", "mouseup", "touchend", "touchcancel"].forEach((name) => {
+      holdZone.addEventListener(name, holdEnd);
+    });
+
+    function buildPinPad() {
+      const layout = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "Back"];
+      document.getElementById("pinPad").innerHTML = layout.map((item) => {
+        if (!item) {
+          return "<div></div>";
+        }
+        return `<button data-pin="${item}">${item}</button>`;
+      }).join("");
+    }
+
+    document.getElementById("pinPad").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-pin]");
+      if (!button) {
+        return;
+      }
+      const value = button.dataset.pin;
+      pinMessage.textContent = "";
+      if (value === "Back") {
+        state.pinEntry = state.pinEntry.slice(0, -1);
+      } else if (state.pinEntry.length < 4) {
+        state.pinEntry += value;
+      }
+      renderPinDots();
+      verifyPinMaybe();
+    });
+
+    buildPinPad();
+    renderPinDots();
+    renderDeckList();
+    renderDeckOptions();
+  </script>
+</body>
+</html>
