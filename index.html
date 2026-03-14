@@ -6,6 +6,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#d84f2a">
+  <meta name="description" content="Imposter is a pass-the-phone party game with custom decks, PIN-protected editing, and Home Screen support.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
   <title>Imposter</title>
   <style>
     :root {
@@ -493,6 +496,11 @@
       </div>
 
       <div class="panel stack">
+        <button class="teal" id="testNotificationBtn">Test notification in 10s</button>
+        <p class="subtle" id="notificationStatus">Install this app to your Home Screen on iPhone, then tap the button to test a local notification.</p>
+      </div>
+
+      <div class="panel stack">
         <label>
           Deck name
           <input id="deckNameInput" type="text" maxlength="40" placeholder="Example: Food, Movies, Animals">
@@ -656,6 +664,8 @@
     const playCardImage = document.getElementById("playCardImage");
     const nextPlayerBtn = document.getElementById("nextPlayerBtn");
     const turnStatus = document.getElementById("turnStatus");
+    const notificationStatus = document.getElementById("notificationStatus");
+    let serviceWorkerRegistration = null;
 
     function saveData() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -913,6 +923,73 @@
       updatePlayScreen();
     }
 
+    function isStandaloneApp() {
+      return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    }
+
+    async function registerServiceWorker() {
+      if (!("serviceWorker" in navigator)) {
+        notificationStatus.textContent = "Service workers are not supported in this browser.";
+        return null;
+      }
+
+      try {
+        serviceWorkerRegistration = await navigator.serviceWorker.register("./sw.js");
+        return serviceWorkerRegistration;
+      } catch {
+        notificationStatus.textContent = "Could not register the service worker.";
+        return null;
+      }
+    }
+
+    async function ensureNotificationPermission() {
+      if (!isStandaloneApp()) {
+        notificationStatus.textContent = "On iPhone, notifications only work after adding the app to the Home Screen and opening it from there.";
+      }
+
+      if (!("Notification" in window)) {
+        notificationStatus.textContent = "This browser does not support notifications.";
+        return false;
+      }
+
+      let permission = Notification.permission;
+      if (permission === "default") {
+        permission = await Notification.requestPermission();
+      }
+
+      if (permission !== "granted") {
+        notificationStatus.textContent = "Notification permission was not granted.";
+        return false;
+      }
+
+      return true;
+    }
+
+    async function scheduleLocalNotification() {
+      const hasPermission = await ensureNotificationPermission();
+      if (!hasPermission) {
+        return;
+      }
+
+      const registration = serviceWorkerRegistration || await registerServiceWorker();
+      notificationStatus.textContent = "Notification scheduled. You should see \"Hi!\" in 10 seconds.";
+      window.setTimeout(async () => {
+        try {
+          if (registration && "showNotification" in registration) {
+            await registration.showNotification("Hi!", {
+              body: "Imposter local test notification",
+              tag: "imposter-local-test"
+            });
+          } else {
+            new Notification("Hi!");
+          }
+          notificationStatus.textContent = "Test notification sent.";
+        } catch {
+          notificationStatus.textContent = "The notification could not be shown in this browser context.";
+        }
+      }, 10000);
+    }
+
     document.getElementById("goPlayBtn").addEventListener("click", () => {
       renderDeckOptions();
       showScreen("playSetupScreen");
@@ -1056,6 +1133,11 @@
     });
 
     document.getElementById("startGameBtn").addEventListener("click", createGame);
+    document.getElementById("testNotificationBtn").addEventListener("click", () => {
+      scheduleLocalNotification().catch(() => {
+        notificationStatus.textContent = "Could not schedule the notification.";
+      });
+    });
     nextPlayerBtn.addEventListener("click", nextPlayer);
 
     const holdStart = (event) => {
@@ -1105,6 +1187,7 @@
     renderPinDots();
     renderDeckList();
     renderDeckOptions();
+    registerServiceWorker();
   </script>
 </body>
 </html>

@@ -1,0 +1,18 @@
+{
+  "name": "Imposter",
+  "short_name": "Imposter",
+  "description": "A pass-the-phone imposter party game with custom decks.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7eddc",
+  "theme_color": "#d84f2a",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
